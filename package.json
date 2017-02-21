@@ -1,0 +1,42 @@
+{
+  "name": "ThinkBack",
+  "version": "0.0.1",
+  "description": "App to explore NSE options and back test strategies",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha --reporter spec build/test/*.js ",
+    "test:watch": "mocha build/test/*.js -w",
+    "pretest": "tsc",
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "clean": "rimraf build/* , dist/* , public/js/*",
+    "browserify": "browserify ./build/src/index.js -o ./public/js/bundle.js",
+    "watch:bundle": "watchify ./build/src/index.js -o ./public/js/bundle.js -v",
+    "dev": "lite-server -c devserver.json"
+  },
+  "typings": "types/types.d.ts",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "d3": "^4.5.0",
+    "flyd": "^0.2.4",
+    "moment": "^2.17.1",
+    "ramda": "^0.23.0",
+    "snabbdom": "^0.6.3",
+    "taffydb": "^2.7.3"
+  },
+  "devDependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/jsdom": "^2.0.29",
+    "@types/mocha": "^2.2.38",
+    "@types/node": "^7.0.4",
+    "@types/ramda": "0.0.3",
+    "browserify": "^14.0.0",
+    "chai": "^3.5.0",
+    "jsdom": "^9.9.1",
+    "lite-server": "^2.2.2",
+    "mocha": "^3.2.0",
+    "rimraf": "^2.5.4",
+    "watchify": "^3.9.0"
+  }
+}
