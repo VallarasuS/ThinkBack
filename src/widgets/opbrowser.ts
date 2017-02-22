@@ -2,25 +2,33 @@ import h from "snabbdom/h";
 import * as R from "ramda";
 import { DataStore } from "../core/datastore";
 import * as datetime from "../core/datetime";
+import * as elems from "./elements";
 
 const flyd = require("flyd");
 
 interface OptionsBrowserState extends State {
     tradeDate$(val?: any): any
     contentsLoaded$(val?: any): any
+    selectedExpiry$(val?: any): any
 }
+/**
+ * 
+ */
 export class OptionsBrowser implements Component {
     /**
      * Component state 
      */
     private state: OptionsBrowserState = {
         tradeDate$: flyd.stream(),
-        contentsLoaded$: flyd.stream(false)
+        contentsLoaded$: flyd.stream(false),
+        selectedExpiry$: flyd.stream()
     }
+    //
     private static makeStrikeCol = function (pair: OptionsPair) {
         const strike = pair.ce ? pair.ce.strike : pair.pe.strike;
         return h("td", strike.toString());
     }
+    //
     private static makeOptionColumns = function (options: Instrument) {
         if (options) {
             return [h("td", options.open.toString()),
@@ -32,14 +40,15 @@ export class OptionsBrowser implements Component {
             return [h("td", ""), h("td", ""), h("td", ""), h("td", "")];
         }
     }
-
-    public static makeRow = function (pair: OptionsPair) {
+    //
+    private static makeRow = function (pair: OptionsPair) {
         return h("tr", R.flatten([
             OptionsBrowser.makeOptionColumns(pair.ce),
             OptionsBrowser.makeStrikeCol(pair),
             OptionsBrowser.makeOptionColumns(pair.pe)]));
     }
-    public static makeHeader = function (): any {
+    //
+    private static makeHeader = function (): any {
         return h("thead", [
             h("th", "Open"),
             h("th", "High"),
@@ -52,25 +61,36 @@ export class OptionsBrowser implements Component {
             h("th", "Close")
         ]);
     }
+    /**
+     * 
+     */
     private static makeOptionsChain = function (state: OptionsBrowserState): any {
         if (!state.tradeDate$()) {
             return h("div", "No data to show");
         }
-        const chain: OptionsChain = DataStore.getInstance().optionsChain(state.tradeDate$());
+        const chain: OptionsChain = DataStore.getInstance()
+                .optionsChain(state.tradeDate$(), state.selectedExpiry$());
         return h("div", [
-            OptionsBrowser.makeOptionsChainHeader(chain),
+            OptionsBrowser.makeOptionsChainHeader(chain, state),
             h("table", [
                 OptionsBrowser.makeHeader(),
                 h("tbody", R.map(OptionsBrowser.makeRow, chain.items))
             ])]);
     }
-    private static makeOptionsChainHeader = function (chain: OptionsChain): any {
+    /**
+     * 
+     */
+    private static makeOptionsChainHeader = function (chain: OptionsChain, state: OptionsBrowserState): any {
         if (!chain) {
             return h("div", "Select a date ...");
         }
+        const t = function (ts: number) {
+            return [datetime.tsToDateStr(ts), ts];
+        }
+        const expiryDateOpts = R.map(t, chain.expiries);
         return h("div.optionschain-header", [
             h("div", "Expiry : "),
-            h("div", datetime.tsToDateStr(chain.selectedExpiry)),
+            elems.singleSelect(expiryDateOpts, state.selectedExpiry$),
             h("div", "Depth : "),
             h("div", chain.items.length.toString())
         ]);

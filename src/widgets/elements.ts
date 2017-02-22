@@ -13,10 +13,10 @@ export function numberInput(targetStream: any) {
                     on: { change: (e: any) => targetStream(parseInt(e.target.value)) } });
 }
 
-export function singleSelect(options: [any] , targetStream: any) {
-    const makeOptions = function(opt){
+export function singleSelect(options: any , targetStream: any) {
+    const makeOptions = function(opt: [any]){
 		return h("option" , {props:{value: opt[1]}}, opt[0]);
 	}
-	return h("select" , {on: { change: (e: any) => targetStream(e.target.value) }}, R.map(makeOptions, options));
+	return h("select" , {on: { change: (e: any) => targetStream(parseInt(e.target.value)) }}, R.map(makeOptions, options));
 	
 }
