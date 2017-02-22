@@ -2,4 +2,4 @@
 - greeks
 - position combos
 - position performance
-- plotting.
+- plotting..
