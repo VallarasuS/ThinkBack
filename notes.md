@@ -21,3 +21,8 @@ Notes
     - Add option to position
     - Analyze performance of position
         
+		
+		BS.call(new BSHolder(8907,8950,0.07,0.12,(2/365)))
+		
+		7% means 0.07
+		12% means 0.12
