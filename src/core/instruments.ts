@@ -14,11 +14,11 @@ export const isOption = (ins: Instrument): boolean => isCE(ins) || isPE(ins);
 
 export const isVix = (ins: Instrument): boolean => ins.type === InstrumentType.VIX;
 
-export const optionsChainStrikeRange = (index: Instrument): OptionsRange => {
+export const optionsChainStrikeRange = (index: Instrument, limit: number): OptionsRange => {
     const indexClosing = index.close;
     return {
-        lowerStrike: nearestHundred(indexClosing - 300),
-        upperStrike: nearestHundred(indexClosing + 300)
+        lowerStrike: nearestHundred(indexClosing - limit),
+        upperStrike: nearestHundred(indexClosing + limit)
     }
 }
 export const toOptionsPair = (options: [Instrument]): [OptionsPair] => {

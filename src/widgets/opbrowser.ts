@@ -10,6 +10,7 @@ interface OptionsBrowserState extends State {
     tradeDate$(val?: any): any
     contentsLoaded$(val?: any): any
     selectedExpiry$(val?: any): any
+    selectedDepth$(val?: any): any
 }
 /**
  * 
@@ -21,7 +22,8 @@ export class OptionsBrowser implements Component {
     private state: OptionsBrowserState = {
         tradeDate$: flyd.stream(),
         contentsLoaded$: flyd.stream(false),
-        selectedExpiry$: flyd.stream()
+        selectedExpiry$: flyd.stream(),
+        selectedDepth$: flyd.stream(400)
     }
     //
     private static makeStrikeCol = function (pair: OptionsPair) {
@@ -69,7 +71,7 @@ export class OptionsBrowser implements Component {
             return h("div", "No data to show");
         }
         const chain: OptionsChain = DataStore.getInstance()
-                .optionsChain(state.tradeDate$(), state.selectedExpiry$());
+                .optionsChain(state.tradeDate$(), state.selectedDepth$(), state.selectedExpiry$());
         return h("div", [
             OptionsBrowser.makeOptionsChainHeader(chain, state),
             h("table", [
@@ -92,7 +94,7 @@ export class OptionsBrowser implements Component {
             h("div", "Expiry : "),
             elems.singleSelect(expiryDateOpts, state.selectedExpiry$),
             h("div", "Depth : "),
-            h("div", chain.items.length.toString())
+            elems.numberInput(state.selectedDepth$)
         ]);
     }
     /**

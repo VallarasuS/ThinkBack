@@ -75,14 +75,3 @@ export function mergeAll(streams: any[]) {
   }, streams.map(function (sm) { return sm.end; })), s);
   return s;
 };
-
-export function render1 (view: any, state: AppState, container: any) {
-  console.log("Initial Render1 begins ..");
-  const state$ = flyd.mergeAll(getObjStreams(state))
-  const viewState = function (c: any) { return view(state) }
-  const view$ = flyd.map(viewState, state$)
-  const vtree$ = flyd.scan(patch, container, view$)
-  state$([]) // trigger an initial patch
-  const dom$ = flyd.map(function (vnode: any) { return vnode.elm }, vtree$)
-  return { state$: state$, vtree$: vtree$, dom$: dom$ }
-} 

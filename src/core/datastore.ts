@@ -5,7 +5,6 @@ const taffy = require("taffydb").taffy;
 export class DataStore {
     private _store: any;
     private static instance: DataStore = new DataStore();
-
     private constructor() {
         this._store = taffy();
     }
@@ -43,12 +42,12 @@ export class DataStore {
         return this.filterByTradeDate(trade_date).distinct("expiriy");
     }
 
-    public optionsChain = function (trade_date: number, expiry?: number): OptionsChain {
-        const index: Instrument = this._store({ trade_date: trade_date, type: I.InstrumentType.Index }).first();
-        const vix: Instrument = this._store({ trade_date: trade_date, type: I.InstrumentType.VIX }).first();
-        const expiries: [number] = this._store({ trade_date: trade_date, type: I.InstrumentType.IndexFuture }).order("expiry").select("expiry");
+    public optionsChain = function (trade_date: number, limit: number, expiry?: number): OptionsChain {
+        const index: Instrument = this._store(Query.indexByTradeDate(trade_date)).first();
+        const vix: Instrument = this._store(Query.vixByTradeDate(trade_date)).first();
+        const expiries: [number] = this._store(Query.indexFutByTradeDate(trade_date)).order("expiry").select("expiry");
         const defaultExpiry = expiry || expiries[0];
-        const opRange = I.optionsChainStrikeRange(index);
+        const opRange = I.optionsChainStrikeRange(index, limit);
         const options = this._store([{ trade_date: trade_date, type: [I.InstrumentType.CE, I.InstrumentType.PE] }])
             .filter({ strike: { "gte": opRange.lowerStrike } })
             .filter({ strike: { "lte": opRange.upperStrike } })
@@ -76,5 +75,21 @@ export class DataStore {
     }
 
 }
+class Query{
+    public static byTradeDateAndType = function (trade_date: number, type: I.InstrumentType ): Object{
+        return { trade_date: trade_date, type: type }
+    }
 
+    public static indexByTradeDate = function (trade_date: number): Object{
+        return Query.byTradeDateAndType(trade_date, I.InstrumentType.Index);
+    }
+
+    public static vixByTradeDate = function (trade_date: number): Object{
+        return Query.byTradeDateAndType(trade_date, I.InstrumentType.VIX);
+    } 
+
+    public static indexFutByTradeDate = function (trade_date: number): Object{
+        return Query.byTradeDateAndType(trade_date, I.InstrumentType.IndexFuture);
+    }
+}
 export const DataStoreInstance = DataStore.getInstance();

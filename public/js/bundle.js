@@ -23,12 +23,12 @@ class DataStore {
         this.findExpiriesForDate = function (trade_date) {
             return this.filterByTradeDate(trade_date).distinct("expiriy");
         };
-        this.optionsChain = function (trade_date, expiry) {
-            const index = this._store({ trade_date: trade_date, type: I.InstrumentType.Index }).first();
-            const vix = this._store({ trade_date: trade_date, type: I.InstrumentType.VIX }).first();
-            const expiries = this._store({ trade_date: trade_date, type: I.InstrumentType.IndexFuture }).order("expiry").select("expiry");
+        this.optionsChain = function (trade_date, limit, expiry) {
+            const index = this._store(Query.indexByTradeDate(trade_date)).first();
+            const vix = this._store(Query.vixByTradeDate(trade_date)).first();
+            const expiries = this._store(Query.indexFutByTradeDate(trade_date)).order("expiry").select("expiry");
             const defaultExpiry = expiry || expiries[0];
-            const opRange = I.optionsChainStrikeRange(index);
+            const opRange = I.optionsChainStrikeRange(index, limit);
             const options = this._store([{ trade_date: trade_date, type: [I.InstrumentType.CE, I.InstrumentType.PE] }])
                 .filter({ strike: { "gte": opRange.lowerStrike } })
                 .filter({ strike: { "lte": opRange.upperStrike } })
@@ -63,6 +63,20 @@ DataStore.toInstruments = function (storeResults) {
     return storeResults.map((rec, no) => rec);
 };
 exports.DataStore = DataStore;
+class Query {
+}
+Query.byTradeDateAndType = function (trade_date, type) {
+    return { trade_date: trade_date, type: type };
+};
+Query.indexByTradeDate = function (trade_date) {
+    return Query.byTradeDateAndType(trade_date, I.InstrumentType.Index);
+};
+Query.vixByTradeDate = function (trade_date) {
+    return Query.byTradeDateAndType(trade_date, I.InstrumentType.VIX);
+};
+Query.indexFutByTradeDate = function (trade_date) {
+    return Query.byTradeDateAndType(trade_date, I.InstrumentType.IndexFuture);
+};
 exports.DataStoreInstance = DataStore.getInstance();
 
 },{"./instruments":3,"taffydb":338}],2:[function(require,module,exports){
@@ -106,11 +120,11 @@ exports.isCE = (ins) => ins.type === InstrumentType.CE;
 exports.isPE = (ins) => ins.type === InstrumentType.PE;
 exports.isOption = (ins) => exports.isCE(ins) || exports.isPE(ins);
 exports.isVix = (ins) => ins.type === InstrumentType.VIX;
-exports.optionsChainStrikeRange = (index) => {
+exports.optionsChainStrikeRange = (index, limit) => {
     const indexClosing = index.close;
     return {
-        lowerStrike: nearestHundred(indexClosing - 300),
-        upperStrike: nearestHundred(indexClosing + 300)
+        lowerStrike: nearestHundred(indexClosing - limit),
+        upperStrike: nearestHundred(indexClosing + limit)
     };
 };
 exports.toOptionsPair = (options) => {
@@ -187,13 +201,17 @@ const setupMock = function (opb) {
 const h_1 = require("snabbdom/h");
 const R = require("ramda");
 function textInput(targetStream) {
-    return h_1.default("input", { props: { type: "text" },
-        on: { change: (e) => targetStream(e.target.value) } });
+    return h_1.default("input", {
+        props: { type: "text", value: targetStream() },
+        on: { change: (e) => targetStream(e.target.value) }
+    });
 }
 exports.textInput = textInput;
 function numberInput(targetStream) {
-    return h_1.default("input", { props: { type: "text" },
-        on: { change: (e) => targetStream(parseInt(e.target.value)) } });
+    return h_1.default("input", {
+        props: { type: "text", value: targetStream() },
+        on: { change: (e) => targetStream(parseInt(e.target.value)) }
+    });
 }
 exports.numberInput = numberInput;
 function singleSelect(options, targetStream) {
@@ -217,7 +235,8 @@ class OptionsBrowser {
         this.state = {
             tradeDate$: flyd.stream(),
             contentsLoaded$: flyd.stream(false),
-            selectedExpiry$: flyd.stream()
+            selectedExpiry$: flyd.stream(),
+            selectedDepth$: flyd.stream(400)
         };
         this.view = function (state) {
             return h_1.default("div#optionschain.optionschain", [
@@ -269,7 +288,7 @@ OptionsBrowser.makeOptionsChain = function (state) {
         return h_1.default("div", "No data to show");
     }
     const chain = datastore_1.DataStore.getInstance()
-        .optionsChain(state.tradeDate$(), state.selectedExpiry$());
+        .optionsChain(state.tradeDate$(), state.selectedDepth$(), state.selectedExpiry$());
     return h_1.default("div", [
         OptionsBrowser.makeOptionsChainHeader(chain, state),
         h_1.default("table", [
@@ -290,7 +309,7 @@ OptionsBrowser.makeOptionsChainHeader = function (chain, state) {
         h_1.default("div", "Expiry : "),
         elems.singleSelect(expiryDateOpts, state.selectedExpiry$),
         h_1.default("div", "Depth : "),
-        h_1.default("div", chain.items.length.toString())
+        elems.numberInput(state.selectedDepth$)
     ]);
 };
 exports.OptionsBrowser = OptionsBrowser;
@@ -367,17 +386,6 @@ function mergeAll(streams) {
 }
 exports.mergeAll = mergeAll;
 ;
-function render1(view, state, container) {
-    console.log("Initial Render1 begins ..");
-    const state$ = flyd.mergeAll(getObjStreams(state));
-    const viewState = function (c) { return view(state); };
-    const view$ = flyd.map(viewState, state$);
-    const vtree$ = flyd.scan(exports.patch, container, view$);
-    state$([]);
-    const dom$ = flyd.map(function (vnode) { return vnode.elm; }, vtree$);
-    return { state$: state$, vtree$: vtree$, dom$: dom$ };
-}
-exports.render1 = render1;
 
 },{"flyd":9,"flyd/module/mergeall":10,"ramda":18,"snabbdom":335,"snabbdom/modules/attributes":330,"snabbdom/modules/class":331,"snabbdom/modules/eventlisteners":332,"snabbdom/modules/props":333,"snabbdom/modules/style":334}],9:[function(require,module,exports){
 'use strict';

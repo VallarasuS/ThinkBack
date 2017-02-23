@@ -1,4 +1,4 @@
-import {render, render1} from "./widgets/renderer";
+import {render} from "./widgets/renderer";
 
 import * as app from "./widgets/app"
 import * as state from "./appstate";

@@ -1,34 +1,8 @@
 
 interface State { }
-interface DataSetState extends State {
-    dataset: {
-        startDate(val?: any): any
-        contents(val?: any): any
-        loadClickStream(val?: any): any
-        loadActionStream(): any
-        msgStream(): any
-        endDate(): any
-    }
-}
-interface OPChainState extends State {
-    opChain: {
-        loadClickStream(): any
-        loadActionStream?(): any
-        msgStream(): any
-        endDate(): any
-        loadSize(val?: any): any
-        navBtnClick$(val?: any): any
-    }
-}
 
-interface Chart {
-    chart: {
-        btnClick$(val?: any): any
-    }
-}
+interface AppState extends State{
 
-interface AppState
-    extends DataSetState, OPChainState, Chart {
 }
 
 interface Instrument {
@@ -69,3 +43,4 @@ interface OptionsChain{
     expiries: [number],
     selectedExpiry: number
 }
+
