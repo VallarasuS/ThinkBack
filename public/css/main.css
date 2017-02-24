@@ -34,15 +34,15 @@
             flex-direction: column;
             width: inherit;
             height: inherit;
-        }
-        
+        }       
         .twothird {
-            flex-grow: 2.75;
-            flex: 3;
+           flex: 2.75;
         }
-        
+        .halfsize {
+            flex-grow: 2;
+            flex:2;
+        }
         .onethird {
-            flex-grow: 1;
             flex: 1.25;
         }
         
@@ -115,3 +115,9 @@
 			display:flex;
 			flex-direction: column;
 		}
+        .mainpanel-left{
+            flex: 2.6;
+        }
+        .mainpanel-right{
+            flex: 1.4;
+        }

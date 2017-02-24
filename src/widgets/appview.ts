@@ -2,12 +2,15 @@ import h from "snabbdom/h";
 import * as R from "ramda";
 import { mountComponent } from "./renderer";
 import { OptionsBrowser } from "./opbrowser";
+import {OptionsDetails} from "./bottompanel";
 import {DataStore} from "../core/datastore";
 const flyd = require("flyd");
 
 export function configure() {
     const op_browser = new OptionsBrowser();
+    const op_details = new OptionsDetails();
     mountComponent(document.querySelector("#optionschain"), op_browser);
+    mountComponent(document.querySelector("#bottompanel-content"), op_details);
     setupMock(op_browser);
 }
 

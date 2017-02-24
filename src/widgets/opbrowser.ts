@@ -1,4 +1,4 @@
-import h from "snabbdom/h";
+import { h } from "snabbdom/h";
 import * as R from "ramda";
 import { DataStore } from "../core/datastore";
 import * as datetime from "../core/datetime";
@@ -11,6 +11,7 @@ interface OptionsBrowserState extends State {
     contentsLoaded$(val?: any): any
     selectedExpiry$(val?: any): any
     selectedDepth$(val?: any): any
+    selectedRow$(val?: any): any
 }
 /**
  * 
@@ -23,7 +24,8 @@ export class OptionsBrowser implements Component {
         tradeDate$: flyd.stream(),
         contentsLoaded$: flyd.stream(false),
         selectedExpiry$: flyd.stream(),
-        selectedDepth$: flyd.stream(400)
+        selectedDepth$: flyd.stream(400),
+        selectedRow$: flyd.stream()
     }
     //
     private static makeStrikeCol = function (pair: OptionsPair) {
@@ -42,12 +44,16 @@ export class OptionsBrowser implements Component {
             return [h("td", ""), h("td", ""), h("td", ""), h("td", "")];
         }
     }
+    private static rowIdentifier = function (option: Instrument) {
+        return option;
+    }
     //
-    private static makeRow = function (pair: OptionsPair) {
-        return h("tr", R.flatten([
+    private static makeRow = function (state: OptionsBrowserState, pair: OptionsPair) {
+        const rowData: any = R.flatten([
             OptionsBrowser.makeOptionColumns(pair.ce),
             OptionsBrowser.makeStrikeCol(pair),
-            OptionsBrowser.makeOptionColumns(pair.pe)]));
+            OptionsBrowser.makeOptionColumns(pair.pe)]);
+        return h("tr", rowData);
     }
     //
     private static makeHeader = function (): any {
@@ -70,13 +76,17 @@ export class OptionsBrowser implements Component {
         if (!state.tradeDate$()) {
             return h("div", "No data to show");
         }
+        const rowBuilderFn = function(item: OptionsPair){
+            return OptionsBrowser.makeRow(state, item);
+        }
         const chain: OptionsChain = DataStore.getInstance()
-                .optionsChain(state.tradeDate$(), state.selectedDepth$(), state.selectedExpiry$());
+                                    .optionsChain(state.tradeDate$(), state.selectedDepth$(), 
+                                    state.selectedExpiry$());
         return h("div", [
             OptionsBrowser.makeOptionsChainHeader(chain, state),
             h("table", [
                 OptionsBrowser.makeHeader(),
-                h("tbody", R.map(OptionsBrowser.makeRow, chain.items))
+                h("tbody", R.map(rowBuilderFn, chain.items))
             ])]);
     }
     /**
