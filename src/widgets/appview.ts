@@ -12,6 +12,8 @@ export function configure() {
     mountComponent(document.querySelector("#optionschain"), op_browser);
     mountComponent(document.querySelector("#bottompanel-content"), op_details);
     setupMock(op_browser);
+	// flyd.map(function(i: any){console.log(i);}, op_details.init().currentOption$);
+    connect(op_browser.init().selectedRow$, op_details.init().currentOption$);
 }
 
 const connect = function (source$: any, tgt$: any) {

@@ -44,3 +44,20 @@ interface OptionsChain{
     selectedExpiry: number
 }
 
+interface BSHolderPort {
+    new (o: any): any
+}
+interface Greeks {
+    price: number
+    delta: number
+    gamma: number
+    rho: number
+    vega: number
+    theta: number
+    strike?: number
+    omega: number
+}
+interface OptionGreeks{
+    ce: Greeks
+    pe: Greeks
+}

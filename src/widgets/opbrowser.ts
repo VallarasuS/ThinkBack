@@ -53,7 +53,7 @@ export class OptionsBrowser implements Component {
             OptionsBrowser.makeOptionColumns(pair.ce),
             OptionsBrowser.makeStrikeCol(pair),
             OptionsBrowser.makeOptionColumns(pair.pe)]);
-        return h("tr", rowData);
+        return h("tr", {on: {click: function(){state.selectedRow$(pair)} }}, rowData);
     }
     //
     private static makeHeader = function (): any {

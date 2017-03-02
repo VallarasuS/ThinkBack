@@ -1,5 +1,9 @@
 import * as R from "ramda"
-
+const bs = require("../thirdparty/blackscholes");
+/**
+ * 
+ * @param val 
+ */
 const nearestHundred = (val: number): number => Math.ceil(val * 100) / 100;
 export enum InstrumentType { Index, IndexFuture, CE, PE, StockFuture, VIX };
 
@@ -46,4 +50,29 @@ export const toOptionsPair = (options: [Instrument]): [OptionsPair] => {
         pairs.push (currentPair);
     }
     return pairs;
+}
+
+export function greeks(spot: number, strike: number, interest: number, vola: number , tty: number): OptionGreeks {
+    const bsh: any = <BSHolderPort>(new bs.BSHolder(spot, strike, interest, vola, (tty / 365)));
+    const greeks = {
+        ce : {
+            price : bs.BS.call(bsh),
+            delta : bs.BS.cdelta(bsh),
+            gamma : bs.BS.gamma(bsh),
+            vega :  bs.BS.vega(bsh),
+            theta : bs.BS.ctheta(bsh),
+            rho : bs.BS.crho(bsh),
+            omega : bs.BS.comega(bsh)
+        },
+        pe : {
+            price : bs.BS.call(bsh),
+            delta : bs.BS.pdelta(bsh),
+            gamma : bs.BS.gamma(bsh),
+            vega :  bs.BS.vega(bsh),
+            theta : bs.BS.ptheta(bsh),
+            rho : bs.BS.prho(bsh),
+            omega : bs.BS.pomega(bsh)
+        }
+    }
+    return greeks;
 }
