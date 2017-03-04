@@ -4,7 +4,7 @@ const defaultFormat = "YYYYMMDD";
 /**
 * Returns today as a Moment instance
 */
-export const today = (): moment.Moment => moment();
+export const today = (): moment.Moment => moment().utc();
 /**
 * Returns the given date as a string using the given format.
 */
@@ -17,7 +17,7 @@ export const toString = (adate: moment.Moment): string => toStringFormat(adate, 
 * Converts the given string representing a date in yyyyMMdd format
 * to a moment (date) instance.
 */
-export const toDate =  (datestr: string): moment.Moment => moment(datestr, defaultFormat);
+export const toDate =  (datestr: string): moment.Moment => moment.utc(datestr, defaultFormat);
 /**
 * Given two moment instances start and end,
 * returns a set of all dates between start and end (inclusive of both)
@@ -31,4 +31,8 @@ export function range (start: moment.Moment, end: moment.Moment = start): Set<mo
   }
   return daysInBetween;
 }
-export const tsToDateStr = (ts: number): string => toString(moment(ts));
+export const tsToDateStr = (ts: number): string => toString(moment(ts).utc());
+
+export const dateStrToTs = (date: string): number => toDate(date).valueOf();
+
+export const diff = (ts1: number, ts2: number) => moment(ts1).utc().diff(moment(ts2).utc(), "days")

@@ -1,5 +1,6 @@
 import * as R from "ramda"
 const bs = require("../thirdparty/blackscholes");
+const math = require("mathjs");
 /**
  * 
  * @param val 
@@ -47,32 +48,36 @@ export const toOptionsPair = (options: [Instrument]): [OptionsPair] => {
         currentStrike = options[i].strike;
     }
     if (currentPair) {
-        pairs.push (currentPair);
+        pairs.push(currentPair);
     }
     return pairs;
 }
 
-export function greeks(spot: number, strike: number, interest: number, vola: number , tty: number): OptionGreeks {
+export function greeks(spot: number, strike: number, interest: number, vola: number, tty: number): OptionGreeks {
     const bsh: any = <BSHolderPort>(new bs.BSHolder(spot, strike, interest, vola, (tty / 365)));
     const greeks = {
-        ce : {
-            price : bs.BS.call(bsh),
-            delta : bs.BS.cdelta(bsh),
-            gamma : bs.BS.gamma(bsh),
-            vega :  bs.BS.vega(bsh),
-            theta : bs.BS.ctheta(bsh),
-            rho : bs.BS.crho(bsh),
-            omega : bs.BS.comega(bsh)
+        ce: {
+            price: round(bs.BS.call(bsh)),
+            delta: round(bs.BS.cdelta(bsh)),
+            gamma: round(bs.BS.gamma(bsh)),
+            vega: round(bs.BS.vega(bsh)),
+            theta: round(bs.BS.ctheta(bsh)),
+            rho: round(bs.BS.crho(bsh)),
+            omega: round(bs.BS.comega(bsh))
         },
-        pe : {
-            price : bs.BS.call(bsh),
-            delta : bs.BS.pdelta(bsh),
-            gamma : bs.BS.gamma(bsh),
-            vega :  bs.BS.vega(bsh),
-            theta : bs.BS.ptheta(bsh),
-            rho : bs.BS.prho(bsh),
-            omega : bs.BS.pomega(bsh)
+        pe: {
+            price: round(bs.BS.put(bsh)),
+            delta: round(bs.BS.pdelta(bsh)),
+            gamma: round(bs.BS.gamma(bsh)),
+            vega: round(bs.BS.vega(bsh)),
+            theta: round(bs.BS.ptheta(bsh)),
+            rho: round(bs.BS.prho(bsh)),
+            omega: round(bs.BS.pomega(bsh))
         }
     }
     return greeks;
+}
+
+function round(no: number): number {
+    return math.round(no, 4);
 }

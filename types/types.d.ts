@@ -56,6 +56,7 @@ interface Greeks {
     theta: number
     strike?: number
     omega: number
+    [key:string]: number
 }
 interface OptionGreeks{
     ce: Greeks

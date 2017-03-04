@@ -20,7 +20,6 @@
 //OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 //SOFTWARE.
 
-
 var NormalD = {
     /**
      * from http://www.math.ucla.edu/~tom/distributions/normal.html
@@ -212,9 +211,6 @@ var BS = {
             return 0;
         }
         return res;
-    },
-    rounding: function(number, places) {
-        return +(Math.round(number + "e+" + places) + "e-" + places);
     }
 };
 var graph = {};
